@@ -1,10 +1,11 @@
 #include "stdio.h"
 #include "stdlib.h"
-#include <string.h>
 #include "dirent.h"
+#include <string.h>
 #include <sys/stat.h>
 #include <limits.h>
 #include <time.h>
+#include <libgen.h>
 
 void GetDir(char *dir);
 void PrintInfo(char *path);
@@ -15,6 +16,8 @@ int  main(int argc, char *argv[]){
 	filename = argv[2];
 	progname = basename(argv[0]);
 	GetDir(argv[1]);
+	printf("Directories checked: %d\n", num_dir);
+	printf("Files checked: %d\n", num_file);
     return 0;
 }
 void GetDir(char *dir){
@@ -22,16 +25,21 @@ void GetDir(char *dir){
 	DIR *dp;
 	if((dp = opendir(dir)) == NULL)
     {
-      printf("%s: Couldn't open %s.\n",progname,dir);
+      fprintf(stderr, "%s: Couldn't open %s.\n",progname,dir);
       return;
     }
 	while ((d = readdir(dp))!= NULL){
 		char path[1024];
+		char buf[200];
 		if (d->d_type == DT_DIR) {
 			if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
 	        	continue;
-			snprintf(path, sizeof(path), "%s/%s", dir, d->d_name);
-			char buf[100];
+	        if(strcmp(dir,"/") == 0){
+				snprintf(path, sizeof(path), "/%s", d->d_name);
+			}
+			else{
+				snprintf(path, sizeof(path), "%s/%s", dir, d->d_name);
+			}
 			num_dir++;
 		  	GetDir(path);
 		}
@@ -59,16 +67,14 @@ void PrintInfo(char *path){
 	strftime(date, sizeof(date), "%D %T", localtime(&ts.tv_sec));
 
 	printf("%s %s %lld %llu ", realpath(path,buf),date,fileStat.st_size,fileStat.st_ino);
-    printf( (S_ISDIR(fileStat.st_mode)) ? "d" : "-");
-    printf( (fileStat.st_mode & S_IRUSR) ? "r" : "-");
-    printf( (fileStat.st_mode & S_IWUSR) ? "w" : "-");
-    printf( (fileStat.st_mode & S_IXUSR) ? "x" : "-");
-    printf( (fileStat.st_mode & S_IRGRP) ? "r" : "-");
-    printf( (fileStat.st_mode & S_IWGRP) ? "w" : "-");
-    printf( (fileStat.st_mode & S_IXGRP) ? "x" : "-");
-    printf( (fileStat.st_mode & S_IROTH) ? "r" : "-");
-    printf( (fileStat.st_mode & S_IWOTH) ? "w" : "-");
-    printf( (fileStat.st_mode & S_IXOTH) ? "x" : "-");
-    printf(" %d ", num_dir);
-    printf("%d\n", num_file);
+	printf( (S_ISDIR(fileStat.st_mode)) ? "d" : "-");
+	printf( (fileStat.st_mode & S_IRUSR) ? "r" : "-");
+	printf( (fileStat.st_mode & S_IWUSR) ? "w" : "-");
+	printf( (fileStat.st_mode & S_IXUSR) ? "x" : "-");
+	printf( (fileStat.st_mode & S_IRGRP) ? "r" : "-");
+	printf( (fileStat.st_mode & S_IWGRP) ? "w" : "-");
+	printf( (fileStat.st_mode & S_IXGRP) ? "x" : "-");
+	printf( (fileStat.st_mode & S_IROTH) ? "r" : "-");
+	printf( (fileStat.st_mode & S_IWOTH) ? "w" : "-");
+	printf( (fileStat.st_mode & S_IXOTH) ? "x\n" : "-\n");
 }
