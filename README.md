@@ -1,4 +1,4 @@
-# Processes in Linux OS
+# Files and Directories UNIX
 *Operating Systems and System Programming. Laboratory Work №2. Variant №2.*
 # Task
 Найти в заданном каталоге (аргумент 1 командной строки) и всех его подкаталогах
